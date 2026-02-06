@@ -1,0 +1,59 @@
+.center {
+  text-align: center;
+}
+
+.wrapping {
+  height: 90%;
+  overflow-y: scroll;
+  max-width: 100%;
+  overflow-x: scroll;
+}
+
+.scrollable {
+  height: 80%;
+  overflow-y: scroll;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.small {
+  font-size: .5rem;
+}
+
+.smallish {
+  font-size: .75rem;
+}
+
+.big {
+  font-size: 1.5rem;
+}
+
+.bigger {
+  font-size: 2rem;
+}
+
+.biggest {
+  font-size: 3rem;
+}
+
+.huge {
+  font-size: 10rem;
+}
+
+.title-slide {
+	background-color: #8C8279;
+  background-image: url(img/ucl-banner-ucl.png);
+	background-position: top right;
+	background-size: 100%;
+}
+
+.center-left {
+  position:          relative;
+  top:               50%;
+  transform:         translateY(50%);
+}
+.center-right {
+  position:          relative;
+  top:               50%;
+  transform:         translateY(50%);
+}
