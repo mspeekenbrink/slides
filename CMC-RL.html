@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Computational Modelling of Cognition</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Maarten Speekenbrink" />
+    <script src="libs/header-attrs-2.30/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="mycss.css" type="text/css" />
+    <link rel="stylesheet" href="width.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Computational Modelling of Cognition
+]
+.subtitle[
+## Reinforcement learning
+]
+.author[
+### Maarten Speekenbrink
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+class: center, middle, inverse
+
+# Background
+
+---
+
+## What is reinforcement learning?
+
+A multi-faceted theory of *learning by doing*
+
+* Learning via interacting with the environment
+  * *active*, rather than *passive* learning
+  * sequential; the outcome of future interactions may depend on earlier actions
+* Learning involves taking actions and observing their consequences
+  * Consequences are changes to the environment and reward (or punishment)
+  * Overarching goal is to maximise reward
+
+---
+
+## Classical (Pavolovian) conditioning
+
+.pull-left[
+
+&lt;img src="https://stories.kuleuven.be/files/_2400x1492_crop_center-center_61_line/pavlov_c-Science-History-Images-Alamy-web.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+An unconditioned stimulus (US, e.g. food) elicit an unconditioned response (UR, e.g. salivating). If the US is preceded by a conditioned stimulus (CS, e.g. tone), a CS-US association `\(V\)` is formed, allowing `\(CS\)` to elicit 
+a conditioned response CR
+
+]
+
+--
+
+Rescorla (1972) model:
+
+`$$w_{t+1}^x = w_t^x + \alpha_x \beta (\lambda - \sum_{x' \in \text{CS}} w_t^{x'})$$`
+* `\(w^x\)` is the associative strength of CS `\(x\)`
+* `\(\alpha_x\)` is the *salience* of CS `\(x\)`
+* `\(\beta\)` is the *association* value of the US
+* `\(\lambda\)` is the maximum association strength of the US
+* `\(w^{\text{tot}}\)` is the total associative strength of all present CS (including `\(x\)`)
+
+---
+
+&lt;!-- 
+## Variations
+
+Bush and Mosteller (`\(w_t^x = p(\text{CR}_t|x)\)`):
+
+`$$w_{t+1}^x = w_t^x + \alpha_x (\lambda - w_t^x)$$`
+Rescorla-Wagner:
+`$$w_{t+1}^x = w_t^x + \alpha_x \beta (\lambda - w_t^\text{tot})$$`
+--&gt;
+
+## Temporal difference learning
+
+The Rescorla-Wagner model is *trial based* and doesn't directly capture learning of delayed US. The Temporal Difference model extends the R-W model to real time and allows prediction of future USs.
+
+---
+
+## Prediction errors and dopamine
+
+RL models of experience-based learning involve adjustment of values according to prediction errors. Montague, Dayan, and Sejnowski (1996) showed that the phasic activity of dopamine cells in the brain reflects prediction (errors) of rewards.
+
+.pull-left[
+&lt;img src="img/RPE-dopamine-firing.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-left[
+&lt;img src="img/RPE-dopamine-cells.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## Instrumental conditioning
+
+Thorndike (1911) Law of Effect: 
+
+&gt;Of several responses made to the same situation, those which are accompanied...by satisfaction...will be more likely to recur; those which are accompanied...by discomfort  ...will be less likely to occur. The greater the satisfaction or discomfort, the greater the strengthening or weakening of the bond.
+
+--
+
+Skinner (1938) Operant Conditioning
+
+.pull-left[
+&lt;img src="img/skinner box.webp" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+* Reinforcement (positive and negative) strengthens behaviour
+* Punishment weakens behaviour
+]
+
+&lt;!-- r mcitet("tolman1948cognitive"): Cognitive maps --&gt;
+
+---
+
+## Classical vs instrumental conditioning
+
+In classical conditioning, the unconditioned or conditioned response is involuntary. Instrumental conditioning involves eliciting voluntary actions. Needs to extend prior models with goal-directed *action selection*.
+
+
+
+---
+
+
+## Current successes
+
+.pull-left[
+&lt;img src="https://pbs.twimg.com/media/DtwW0KPWsAA7qVb?format=jpg&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
+Google Deepmind's Alpha Zero
+]
+
+.pull-right[
+&lt;img src="https://eatron.com/wp-content/uploads/2021/05/part4.png" width="100%" style="display: block; margin: auto;" /&gt;
+Self-driving cars
+]
+
+
+---
+
+class: center, middle, inverse
+
+# Markov Decision Processes
+
+---
+
+## Markov Decision Processes
+
+&lt;img src="https://static.wixstatic.com/media/be7152_c68c151c0c6d4911907458740125e09d~mv2.png/v1/fill/w_740,h_286,al_c,lg_1,q_85,enc_auto/be7152_c68c151c0c6d4911907458740125e09d~mv2.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+A Markov Decision Process (MPD) is a mathematical framework for solving (some) RL problems. An MDP consists of:
+
+- A state space `\(\mathcal{S} = \{s_1, s_2, \ldots, s_n\}\)`
+- An action space `\(\mathcal{A} = \{a_1, a_2, \ldots, a_m\}\)`
+- A state-action-state transition function `\(p(S_{t+1}|S_t, A_t)\)`
+- A reward function `\(p(S_{t+1}, R_{t+1}|S_t, A_t)\)`
+
+The objective is to find a **policy** `\(\pi(s) = p(A_t|S_t)\)` that maximises the expected cumulative (discounted) reward
+
+`$$\mathbb{E}_\pi[\sum_{k=0}^\infty \gamma^k R_{t+k+1}|S_t]$$`
+
+---
+
+## Example: Grid World
+
+.pull-left[
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+* States `\((\mathcal{S})\)`: 23 available positions (squares) on the grid
+* Actions `\((\mathcal{A})\)`: Up, Right, Down, Left
+
+The start state is the top left position. Positions with a "T" transport back to the starting state, regardless of action 
+]
+
+--
+
+What is the optimal path?
+
+---
+
+## Prediction: The value function
+
+The value function `\(v_\pi(s)\)` is the expected (discounted) cumulative reward of following a policy `\(\pi\)` in state `\(s\)`:
+
+`$$v_\pi(s) = \mathbb{E}_\pi[\sum_{k=0}^\infty \gamma^k R_{t+k+1}|S_t = s]$$`
+(when in state `\(s\)` at time `\(t\)`, what is the expected cumulative discounted reward the agent will get from following policy `\(\pi\)`?)
+
+--
+
+The optimal value function is the maximum expected cumulative reward over all policies `\(\pi\)`:
+
+`$$v_*(s) = \max_{\pi} v_\pi(s)$$`
+and respects the Bellman optimality equation:
+
+`$$v_*(s) = \max_{a} \sum_{s', r} p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a) \left(r + \gamma v_*(s')\right)$$`
+--
+
+If `\(p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a)\)` is known, optimal policy can be found by *Dynamic Programming*
+
+---
+
+## Dynamic Programming for Grid World
+
+&lt;iframe width="600" height="400" src="https://mspeekenbrink.github.io/reinforcejs/my_gridworld_dp.html" title="Gridworld DP example" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:100%; height:100%" allowfullscreen&gt;&lt;/iframe&gt;
+
+---
+
+## Prediction from experience: Temporal difference learning
+
+If `\(p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a)\)` is not known, a policy can be evaluated via experience.
+
+In state `\(S_t\)`, agent takes action `\(A_t\)` according to policy `\(\pi\)`, then moves to state `\(S_{t+1}\)` and obtains reward `\(R_{t+1}\)`. Learning now involves the update:
+
+`$$V_\text{new}(S_t) \leftarrow V_\text{old}(S_t) + \alpha_{t} \left(R_{t+1} + \gamma V_\text{old}(S_{t+1}) - V_\text{old}(S_t)\right)$$`
+where `\(\alpha_{t} \in (0, 1]\)` is the **learning rate** at time `\(t\)` and
+`$$\delta_{t} = R_{t+1} + \gamma V_\text{old}(S_{t+1}) - V_\text{old}(S_t)$$`
+a **prediction error**, because of the Bellman equation `\(v(S_{t}) = R_t + \gamma v(S_{t+1})\)`
+
+
+---
+
+## Control: The action-value function
+
+Closely related to the value function is the action-value function:
+
+`$$q_\pi(s, a) = \mathbb{E}_\pi[\sum_{k=0}^\infty \gamma^k R_{t+k+1}|S_t=s, A_t = a]$$`
+
+The value function can be defined from the action-value function as:
+`$$v_\pi(s) = \sum_{a} p(A_t = a|S_t = s) q_\pi(s,a)$$`
+
+The action-value function is useful as it allows evaluating particular actions `\(a\)` in states `\(s\)`, rather than focusing on the whole policy.
+
+---
+
+## Control from experience: SARSA and Q-learning
+
+In state `\(S_t\)`, agent takes action `\(A_t\)`, then moves to state `\(S_{t+1}\)` and obtains reward `\(R_{t+1}\)`. Learning involves the update:
+
+`$$Q_\text{new}(S_t,A_t) \leftarrow Q_\text{old}(S_t,A_t) + \alpha_{t} \delta_t$$`
+Two popular learning algorithms differ in the definition of the prediction error:
+
+**SARSA**: `\(\delta_t = R_{t+1} + \gamma Q_\text{old}(S_{t+1},A_{t+1}) - Q_\text{old}(S_t,A_t)\)`
+
+**Q-learning**: `\(\delta_t = R_{t+1} + \gamma \max_a Q_\text{old}(S_{t+1},A_{t+1} = a) - Q_\text{old}(S_t,A_t)\)`
+
+--
+
+
+If
+* all possible actions `\(A_t\)` are taken in each possible state `\(S_t\)` an infinite number of times
+* the learning rate to reduces to 0 over time `\((\alpha_{\infty} \rightarrow 0)\)`
+
+Q-learning is guaranteed to converge on the optimal action-value function `\(q_*(s, a)\)` (Watkins and Dayan, 1992).
+
+Convergence of SARSA additionally requires `\(A_t\)` to be chosen sensibly (over time always choosing `\(A_t = \arg \max_a Q_j(S_{t+1},a)\)`)
+
+---
+
+## Q-learning for Grid World
+
+&lt;iframe width="600" height="400" src="https://mspeekenbrink.github.io/reinforcejs/my_gridworld_td.html" title="Gridworld TD example" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:100%; height:100%" allowfullscreen&gt;&lt;/iframe&gt;
+
+
+
+---
+
+class: center, middle, inverse
+
+# Exploration in multi-armed bandits
+
+---
+
+## Exploration
+
+Learning the optimal policy from experience **requires exploration**, but choosing sub-optimal actions reduces the cumulative reward. This is the **exploration-exploitation dilemma**:
+
+*Should you choose an option which you know you like (exploit), or a more uncertain option such that by learning about it you might improve future decisions (exploration)?*
+
+.pull-left[
+&lt;img src="img/bandit.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+Multi-armed bandits are a simple paradigm to study the exploration-exploitation dilemma.
+]
+
+
+---
+
+## Multi-armed bandits
+
+A multi-armed bandit is one of the simplest RL problems.
+
+The setup is:
+
+- There are `\(K\)` bandits ("slot machines"), each with an unknown reward function `\(p(R_t|A_t = k)\)`.
+- The action is to play one of the bandits
+- The objective is to maximise the cumulative reward 
+- There is only one objective state, so don't need to worry about state transitions
+
+---
+
+## Multi-armed bandits
+
+
+
+&lt;img src="CMC-RL_files/figure-html/bandit-plot-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Uncertainty and exploration
+
+&lt;img src="CMC-RL_files/figure-html/bayesian-learning-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+--
+
+Uncertainty ignorant exploration strategies:
+
+* epsilon-greedy: with probability `\(\epsilon \in [0,1]\)` explore uniformly, otherwise exploit
+* Softmax: Choose options according to `\(\frac{\exp (\theta \times Q_j)}{\sum_k \exp(\theta \times Q_k)}\)`
+
+Uncertainty-based exploration strategies:
+
+* Upper-confidence bound (UCB): Choose option with highest upper confidence bound `\(Q_j + \beta \times U(Q_j)\)`
+* Thompson sampling: For each option, sample an expected reward from the posterior distribution, and choose option with highest sampled reward
+
+---
+
+## Uncertainty and exploration
+
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="CMC-RL_files/figure-html/exploration-strategies-plot-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="img/ownArticles/speekenbrink-ToPIC.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="CMC-RL_files/figure-html/kalman-UCB-exploration-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="img/ownArticles/speekenbrink-ToPIC.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+Large-scale comparison of computational models showing evidence for
+* Bayesian learning (Kalman filter; learning rate determined by uncertainty)
+* Uncertainty-guided exploration (akin to Thompson sampling) 
+
+---
+
+&lt;img src="img/ownArticles/stojic-fixation.png" width="90%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/stojic-fixation-design.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+--
+
+Computational modelling and eye-tracking show that estimated value and uncertainty influence:
+
+* Visual fixations (people fixate more on high-value and high-uncertainty options)
+* Decisions (people choose high-value and high-uncertainty options more often)
+* Fixation on reward feedback (people fixate longer on feedback with higher uncertainty)
+
+---
+
+&lt;img src="img/ownArticles/wu-pressure.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/wu-pressure-design.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+--
+
+Less uncertainty-guidance and more habitual choices under time pressure. 
+
+Balancing exploration and exploitation likely requires time-costly cognitive operations.
+
+---
+
+### Contextual multi-armed bandits
+
+&lt;img src="CMC-RL_files/figure-html/bandit-plot-2-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Gaussian processes
+
+&lt;img src="img/ownArticles/schulz-GP-tutorial.png" width="50%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/GP-example.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Gaussian processes
+
+
+
+&lt;img src="img/ownArticles/schulz-GP-tutorial.png" width="50%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+Gaussian Processes unite instance-based and rule-based theories of function learning.
+
+The covariance kernel induces a similarity space over objects/states. This can be goal-dependent.
+
+Kernels may be complex compositions of simpler kernels (Schulz, Tenenbaum, Duvenaud, Speekenbrink, and Gershman, 2017).
+
+---
+
+&lt;img src="img/ownArticles/wu-search.png" width="60%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+
+&lt;img src="img/Wu-GPUCB-example.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="img/ownArticles/wu-search.png" width="60%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/Wu-exploration-results.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+&lt;img src="img/ownArticles/stojic-novelty.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/novelty-task.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+&lt;img src="img/ownArticles/stojic-novelty.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/stojic-predictions-A.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="img/ownArticles/stojic-novelty.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/stojic-predictions-B.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="img/ownArticles/stojic-novelty.png" width="70%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+Evidence for
+* Functional generalization (more likely to explore novel option if features indicate it is relatively good)
+* Uncertainty guidance (more likely to explore a novel option if value is uncertain)
+
+---
+
+class: center, middle, inverse
+
+# Model-free vs model-based RL
+
+---
+
+## Model-free vs model-based RL
+
+Model-free RL (e.g. Q-learning) learns action-values (expected cumulative reward) without explicit reference to state-action-state transitions. Model-free RL is computationally simple, but slow to adapt to changes in the environment.
+
+Predicting state transitions is useful for **planning**. Model-based RL involves explicit models for state-action-state transitions and the reward function. Model-based RL is computationally more expensive, but can adapt quickly to changes in the reward function.
+
+Evidence for both forms of learning (Gläscher, Daw, Dayan, and O'Doherty, 2010). Arbitration between model-based and model-free RL may be based on cost-benefit tradeoff (Kool, Gershman, and Cushman, 2017)
+
+---
+
+class: center, middle, inverse
+
+# Opponent modelling
+
+---
+
+## RL in multi-agent settings
+
+In games like Rock-Paper-Scissors, Tic-Tac-Toe, Chess, Go, the state of the environment depends on the actions of another player
+
+* The state-transition probabilities will change over time `\(p(S_{t+1}|S_{t}, A_t)\)` if the opponent adapts their policy
+  * Model-free RL can (slowly) adapt to changing environments.
+  * Model-based RL may have an advantage if the changes can be predicted 
+* Even if the opponent does not change their policy, a model of the opponent is useful in **generalization** of experience to new games
+  * E.g., "opponent expects me to repeat my previous action" can help provide useful actions in a variety of games
+
+---
+
+## Generalizing opponent models in simple games
+
+&lt;img src="img/ownArticles/guennouni-opponent.png" width="40%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+&lt;img src="img/RPS-experiment-screen.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+--
+
+Two types of AI opponents:
+* Level-1: Expects human player to repeat last action
+* Level-2: Expects human player to be a level 1 player
+
+Also played Fire-Water-Grass and Numbers game/Shootout.
+
+---
+
+## Generalizing opponent models in simple games
+
+&lt;img src="img/guennouni-exp1-early-rounds.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Generalizing opponent models in simple games
+
+&lt;img src="img/guennouni-exp2-early-rounds.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Model-free RL does not generalize to new games
+
+
+|self |opponent |  R|  P|  S|
+|:----|:--------|--:|--:|--:|
+|R    |R        | -1|  0|  1|
+|R    |P        | -1|  0|  1|
+|R    |S        | -1|  0|  1|
+|P    |R        |  1| -1|  0|
+|P    |P        |  1| -1|  0|
+|P    |S        |  1| -1|  0|
+|S    |R        |  0|  1| -1|
+|S    |P        |  0|  1| -1|
+|S    |S        |  0|  1| -1|
+
+---
+
+## Model-free RL does not generalize to new games
+
+
+|self |opponent |F  |W  |G  |
+|:----|:--------|:--|:--|:--|
+|F    |F        |?  |?  |?  |
+|F    |W        |?  |?  |?  |
+|F    |G        |?  |?  |?  |
+|W    |F        |?  |?  |?  |
+|W    |W        |?  |?  |?  |
+|W    |G        |?  |?  |?  |
+|G    |F        |?  |?  |?  |
+|G    |W        |?  |?  |?  |
+|G    |G        |?  |?  |?  |
+
+---
+
+## But a Bayesian model can
+
+The Bayesian Cognitive Hierarchy model (Guennouni &amp; Speekenbrink, 2022) expects an opponent to have a fixed "level of reasoning":
+
+* Level-0: Adopts a fixed strategy (e.g. repeats last action)
+* Level-1: Expects opponent to be a Level-1 player and best-responds to that
+* Level-2: Expects opponent to be a Level-2 player and best-responds to that
+* `\(\ldots\)`
+
+but allows for errors of execution with a certain probability. From a prior over opponent types, it learns the type from the opponent's actions.
+
+--
+
+This is equivalent to learning a state-action-state transition function, which can be generalized to new games
+
+---
+
+## Early model-based, later model-free
+
+&lt;img src="img/guennouni-exp1-HMM-posterior.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Early model-based, later model-free
+
+&lt;img src="img/guennouni-exp2-HMM-posterior.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: center, middle, inverse
+
+# Summary
+
+---
+
+## Summary
+
+* Reinforcement learning is a theory and mathematical framework for "learning by doing"
+  * It is successful in describing how humans learn, and making machines learn
+* Two main classes of RL: model-free and model-based
+  * Both forms seem to be used by humans, with goal-based arbitration
+* Successful learning and control requires balancing  *exploration* and *exploitation*
+  * Evidence for uncertainty-guided exploration supports Bayesian RL
+* Simple RL algorithms are unable to generalize experience to novel situations
+  * Seemingly different observable states may be similar in terms of optimal actions
+  * Generalization may require learning with *latent* states (POMDP), or flexible causal models of the environment
+  * Compositional Gaussian Processes?
+* RL multi-agent settings is complex as agents adapt to each other
+  * Algorithms like 
+  * Opponent models may reduce complexity
+
+---
+
+## The RL bible
+
+&lt;img src="img/RL-book-cover.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## References
+
+.smallish[
+
+Gläscher, J., N. Daw, P. Dayan, et al. (2010). "States versus rewards:
+dissociable neural prediction error signals underlying model-based and
+model-free reinforcement learning". In: _Neuron_ 66.4, pp. 585-595.
+
+Kool, W., S. J. Gershman, and F. A. Cushman (2017). "Cost-benefit
+arbitration between multiple reinforcement-learning systems". In:
+_Psychological science_ 28.9, pp. 1321-1333.
+
+Montague, P. R., P. Dayan, and T. J. Sejnowski (1996). "A framework for
+mesencephalic dopamine systems based on predictive Hebbian learning".
+In: _Journal of neuroscience_ 16.5, pp. 1936-1947.
+
+Rescorla, R. A. (1972). "A theory of Pavlovian conditioning: Variations
+in the effectiveness of reinforcement and non-reinforcement". In:
+_Classical conditioning, Current research and theory_ 2, pp. 64-69.
+
+Schulz, E., J. B. Tenenbaum, D. Duvenaud, et al. (2017). "Compositional
+inductive biases in function learning". In: _Cognitive psychology_ 99,
+pp. 44-79.
+
+Skinner, B. (1938). "The behavior of organisms: An experimental
+analysis".
+
+Sutton, R. S. and A. G. Barto (2018). _Reinforcement learning: An
+introduction_. 2nd edition.
+
+Thorndike, E. L. (1911). _Animal Intelligence: Experimental Studies_.
+Transaction Publishers.
+
+Watkins, C. J. C. H. and P. Dayan (1992). "Q-learning". In: _Machine
+learning_ 8.3, pp. 279-292.
+
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
