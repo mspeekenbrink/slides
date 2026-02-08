@@ -49,7 +49,7 @@ A multi-faceted theory of *learning by doing*
   * sequential; the outcome of future interactions may depend on earlier actions
 * Learning involves taking actions and observing their consequences
   * Consequences are changes to the environment and reward (or punishment)
-  * Overarching goal is to maximise reward
+  * Overarching goal is to maximise accumulated rewards
 
 ---
 
@@ -63,21 +63,44 @@ A multi-faceted theory of *learning by doing*
 
 .pull-right[
 
-An unconditioned stimulus (US, e.g. food) elicit an unconditioned response (UR, e.g. salivating). If the US is preceded by a conditioned stimulus (CS, e.g. tone), a CS-US association `\(V\)` is formed, allowing `\(CS\)` to elicit 
+An unconditioned stimulus (US, e.g. food) elicits an unconditioned response (UR, e.g. salivating). If the US is preceded by a conditioned stimulus (CS, e.g. tone), a CS-US association `\(V\)` is formed, allowing `\(CS\)` to elicit 
 a conditioned response CR
 
 ]
 
 --
 
-Rescorla (1972) model:
+Rescorla and Wagner (1972) model:
 
 `$$w_{t+1}^x = w_t^x + \alpha_x \beta (\lambda - \sum_{x' \in \text{CS}} w_t^{x'})$$`
 * `\(w^x\)` is the associative strength of CS `\(x\)`
 * `\(\alpha_x\)` is the *salience* of CS `\(x\)`
-* `\(\beta\)` is the *association* value of the US
+* `\(\beta\)` is the *association value* of the US
 * `\(\lambda\)` is the maximum association strength of the US
-* `\(w^{\text{tot}}\)` is the total associative strength of all present CS (including `\(x\)`)
+
+---
+
+## Rescorla-Wagner model
+
+`$$w_{t+1}^x = w_t^x + 0.05 (1 - \sum_{x' \in \text{CS}} w_t^{x'})$$`
+
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Rescorla-Wagner model (blocking)
+
+`$$w_{t+1}^x = w_t^x + 0.05 (1 - \sum_{x' \in \text{CS}} w_t^{x'})$$`
+
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-3-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Rescorla-Wagner model (partial reinforcement)
+
+`$$w_{t+1}^x = w_t^x + 0.05 (1 - \sum_{x' \in \text{CS}} w_t^{x'})$$`
+
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-4-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -93,13 +116,23 @@ Rescorla-Wagner:
 
 ## Temporal difference learning
 
-The Rescorla-Wagner model is *trial based* and doesn't directly capture learning of delayed US. The Temporal Difference model extends the R-W model to real time and allows prediction of future USs.
+The Temporal Difference model (Sutton and Barto, 1990) extends the R-W model to learning in real time and allows prediction of the timing of future USs.
+
+.pull-left[
+&lt;img src="img/TD-stimulus-trace.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="img/TD-stimulus-representations.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;img src="img/TD-US-predictions.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Prediction errors and dopamine
+## Reward prediction errors and dopamine
 
-RL models of experience-based learning involve adjustment of values according to prediction errors. Montague, Dayan, and Sejnowski (1996) showed that the phasic activity of dopamine cells in the brain reflects prediction (errors) of rewards.
+RL models of experience-based learning involve adjustment of values according to prediction errors. Montague, Dayan, and Sejnowski (1996) showed that the phasic activity of dopamine cells in the midbrain reflects prediction errors of rewards.
 
 .pull-left[
 &lt;img src="img/RPE-dopamine-firing.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -138,24 +171,6 @@ Skinner (1938) Operant Conditioning
 
 In classical conditioning, the unconditioned or conditioned response is involuntary. Instrumental conditioning involves eliciting voluntary actions. Needs to extend prior models with goal-directed *action selection*.
 
-
-
----
-
-
-## Current successes
-
-.pull-left[
-&lt;img src="https://pbs.twimg.com/media/DtwW0KPWsAA7qVb?format=jpg&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
-Google Deepmind's Alpha Zero
-]
-
-.pull-right[
-&lt;img src="https://eatron.com/wp-content/uploads/2021/05/part4.png" width="100%" style="display: block; margin: auto;" /&gt;
-Self-driving cars
-]
-
-
 ---
 
 class: center, middle, inverse
@@ -172,8 +187,7 @@ A Markov Decision Process (MPD) is a mathematical framework for solving (some) R
 
 - A state space `\(\mathcal{S} = \{s_1, s_2, \ldots, s_n\}\)`
 - An action space `\(\mathcal{A} = \{a_1, a_2, \ldots, a_m\}\)`
-- A state-action-state transition function `\(p(S_{t+1}|S_t, A_t)\)`
-- A reward function `\(p(S_{t+1}, R_{t+1}|S_t, A_t)\)`
+- A state-action-state-reward transition function `\(p(S_{t+1}, R_{t+1}|S_t, A_t)\)`
 
 The objective is to find a **policy** `\(\pi(s) = p(A_t|S_t)\)` that maximises the expected cumulative (discounted) reward
 
@@ -184,7 +198,7 @@ The objective is to find a **policy** `\(\pi(s) = p(A_t|S_t)\)` that maximises t
 ## Example: Grid World
 
 .pull-left[
-&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
@@ -203,22 +217,25 @@ What is the optimal path?
 
 ## Prediction: The value function
 
-The value function `\(v_\pi(s)\)` is the expected (discounted) cumulative reward of following a policy `\(\pi\)` in state `\(s\)`:
+The value function `\(v_\pi(s)\)` is the expected (discounted) cumulative reward of following a policy `\(\pi(a|s)\)` starting from state `\(s\)`:
 
 `$$v_\pi(s) = \mathbb{E}_\pi[\sum_{k=0}^\infty \gamma^k R_{t+k+1}|S_t = s]$$`
-(when in state `\(s\)` at time `\(t\)`, what is the expected cumulative discounted reward the agent will get from following policy `\(\pi\)`?)
+(when in state `\(s\)` at time `\(t\)`, what is the expected cumulative discounted reward `\(R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots\)` the agent will get by following policy `\(\pi\)`?)
 
 --
 
-The optimal value function is the maximum expected cumulative reward over all policies `\(\pi\)`:
+The value function respects the *Bellman equation*:
+
+`$$v_\pi(s) = \sum_{a} \pi(A_t = a|S_t = s)\sum_{s', r} p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a) \left(r + \gamma v_\pi(s')\right)$$`
+
+--
+
+The optimal value function is the maximum expected cumulative reward over all policies `\(\pi(a|s)\)`:
 
 `$$v_*(s) = \max_{\pi} v_\pi(s)$$`
-and respects the Bellman optimality equation:
-
-`$$v_*(s) = \max_{a} \sum_{s', r} p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a) \left(r + \gamma v_*(s')\right)$$`
 --
 
-If `\(p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a)\)` is known, optimal policy can be found by *Dynamic Programming*
+If `\(p(S_{t+1} = s', R_{t+1} = r|S_t = s, A_t = a)\)` is known, the optimal policy can be found by *Dynamic Programming*
 
 ---
 
@@ -247,6 +264,7 @@ a **prediction error**, because of the Bellman equation `\(v(S_{t}) = R_t + \gam
 Closely related to the value function is the action-value function:
 
 `$$q_\pi(s, a) = \mathbb{E}_\pi[\sum_{k=0}^\infty \gamma^k R_{t+k+1}|S_t=s, A_t = a]$$`
+(when in state `\(s\)` at time `\(t\)`, what is the expected cumulative discounted reward the agent will get by taking action `\(a\)` and then following policy `\(\pi\)`?)
 
 The value function can be defined from the action-value function as:
 `$$v_\pi(s) = \sum_{a} p(A_t = a|S_t = s) q_\pi(s,a)$$`
@@ -273,7 +291,7 @@ If
 * all possible actions `\(A_t\)` are taken in each possible state `\(S_t\)` an infinite number of times
 * the learning rate to reduces to 0 over time `\((\alpha_{\infty} \rightarrow 0)\)`
 
-Q-learning is guaranteed to converge on the optimal action-value function `\(q_*(s, a)\)` (Watkins and Dayan, 1992).
+Then Q-learning is guaranteed to converge on the optimal action-value function `\(q_*(s, a)\)` (Watkins and Dayan, 1992).
 
 Convergence of SARSA additionally requires `\(A_t\)` to be chosen sensibly (over time always choosing `\(A_t = \arg \max_a Q_j(S_{t+1},a)\)`)
 
@@ -283,13 +301,11 @@ Convergence of SARSA additionally requires `\(A_t\)` to be chosen sensibly (over
 
 &lt;iframe width="600" height="400" src="https://mspeekenbrink.github.io/reinforcejs/my_gridworld_td.html" title="Gridworld TD example" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:100%; height:100%" allowfullscreen&gt;&lt;/iframe&gt;
 
-
-
 ---
 
 class: center, middle, inverse
 
-# Exploration in multi-armed bandits
+# The exploration-exploitation dilemma
 
 ---
 
@@ -312,14 +328,12 @@ Multi-armed bandits are a simple paradigm to study the exploration-exploitation 
 
 ## Multi-armed bandits
 
-A multi-armed bandit is one of the simplest RL problems.
-
-The setup is:
+A multi-armed bandit is one of the simplest RL problems. The setup is:
 
 - There are `\(K\)` bandits ("slot machines"), each with an unknown reward function `\(p(R_t|A_t = k)\)`.
-- The action is to play one of the bandits
+- The action `\(A_t\)` is to play one of the bandits
 - The objective is to maximise the cumulative reward 
-- There is only one objective state, so don't need to worry about state transitions
+- There is only a single environment state `\(s\)`, so don't need to worry about state transitions
 
 ---
 
@@ -331,27 +345,51 @@ The setup is:
 
 ---
 
-## Uncertainty and exploration
+## Bayesian RL
+
+Model of the environment:
+
+`$$\begin{aligned}
+p(R_t|A_t = j) &amp;= \mathbf{Normal}(\mu_{j,t}, \sigma_j) \\
+p(\mu_{j,t+1}|\mu_{j,t}) &amp;= \mathbf{Normal}(\mu_{j,t}, \sigma_{\xi})
+\end{aligned}$$`
+
+--
+
+Start with prior distribution: `\(p(\mu_{j,0}) = \mathbf{Normal}(m_{j,0}, v_{j,0})\)`
+
+--
+
+Update prior to posterior via the **Kalman filter**:
+`$$\begin{aligned}
+m_{j,t} &amp;= m_{j,t-1} + \kappa_{j,t} (R_{t} - m_{j,t-1}) \\
+v_{j,t} &amp;= (1-\kappa_{j,t})(v_{j,t-1} + \sigma_{\xi}^2) \\
+\kappa_{j,t} &amp;= \begin{cases} \frac{v_{j,t-1} + \sigma^2_{\xi}}{v_{j,t-1} + \sigma^2_{\xi} + \sigma^2_j} &amp;&amp; A_t = j \\ 0 &amp;&amp; A_t \neq j \end{cases}
+\end{aligned}$$`
+
+--
 
 &lt;img src="CMC-RL_files/figure-html/bayesian-learning-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
---
+---
+
+## Uncertainty and exploration
+
 
 Uncertainty ignorant exploration strategies:
 
 * epsilon-greedy: with probability `\(\epsilon \in [0,1]\)` explore uniformly, otherwise exploit
-* Softmax: Choose options according to `\(\frac{\exp (\theta \times Q_j)}{\sum_k \exp(\theta \times Q_k)}\)`
+* Softmax: Choose options according to `\(\frac{\exp (\theta \times m_{j,t})}{\sum_k \exp(\theta \times m_{k,t})}\)`
 
 Uncertainty-based exploration strategies:
 
-* Upper-confidence bound (UCB): Choose option with highest upper confidence bound `\(Q_j + \beta \times U(Q_j)\)`
+* Upper-confidence bound (UCB): Choose option with highest upper confidence bound `\(m_{j,t} + \beta \times \sqrt{v}_{j,t}\)`
 * Thompson sampling: For each option, sample an expected reward from the posterior distribution, and choose option with highest sampled reward
 
 ---
 
 ## Uncertainty and exploration
 
-&lt;img src="CMC-RL_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="CMC-RL_files/figure-html/exploration-strategies-plot-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
@@ -482,6 +520,17 @@ Evidence for both forms of learning (Gläscher, Daw, Dayan, and O'Doherty, 2010)
 
 ---
 
+## The two-step task (Daw, Gershman, Seymour, Dayan, and Dolan, 2011)
+
+&lt;img src="img/daw_two_step_task_design.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+--
+
+&lt;img src="img/daw_two_step_predictions_results.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
 class: center, middle, inverse
 
 # Opponent modelling
@@ -490,7 +539,7 @@ class: center, middle, inverse
 
 ## RL in multi-agent settings
 
-In games like Rock-Paper-Scissors, Tic-Tac-Toe, Chess, Go, the state of the environment depends on the actions of another player
+In games like Rock-Paper-Scissors, Tic-Tac-Toe, Chess, Go, the state of the environment depends also on the actions of the other player(s).
 
 * The state-transition probabilities will change over time `\(p(S_{t+1}|S_{t}, A_t)\)` if the opponent adapts their policy
   * Model-free RL can (slowly) adapt to changing environments.
@@ -530,6 +579,7 @@ Also played Fire-Water-Grass and Numbers game/Shootout.
 
 ## Model-free RL does not generalize to new games
 
+`\(Q(s, a)\)` with `\(s = \{\text{previous own action},\text{previous opponent action\}\)`
 
 |self |opponent |  R|  P|  S|
 |:----|:--------|--:|--:|--:|
@@ -547,6 +597,7 @@ Also played Fire-Water-Grass and Numbers game/Shootout.
 
 ## Model-free RL does not generalize to new games
 
+`\(Q(s, a)\)` with `\(s = \{\text{previous own action},\text{previous opponent action\}\)`
 
 |self |opponent |F  |W  |G  |
 |:----|:--------|:--|:--|:--|
@@ -600,18 +651,18 @@ class: center, middle, inverse
 ## Summary
 
 * Reinforcement learning is a theory and mathematical framework for "learning by doing"
-  * It is successful in describing how humans learn, and making machines learn
+  * It is successful in describing how humans learn, and for training machines.
 * Two main classes of RL: model-free and model-based
   * Both forms seem to be used by humans, with goal-based arbitration
-* Successful learning and control requires balancing  *exploration* and *exploitation*
+* Successful experiential learning and control requires balancing  *exploration* and *exploitation*
   * Evidence for uncertainty-guided exploration supports Bayesian RL
 * Simple RL algorithms are unable to generalize experience to novel situations
   * Seemingly different observable states may be similar in terms of optimal actions
-  * Generalization may require learning with *latent* states (POMDP), or flexible causal models of the environment
+  * Generalization may require learning with *latent* -- not directly observable -- states (partially-observed Markov Decision Process, POMDP), or flexible causal models of the environment
   * Compositional Gaussian Processes?
-* RL multi-agent settings is complex as agents adapt to each other
-  * Algorithms like 
-  * Opponent models may reduce complexity
+* Multi-agent RL settings are complex because agents adapt their policy to each other
+  * Model-free RL can adapt to a changing environment
+  * Opponent models may enhance learning and generalization
 
 ---
 
@@ -625,6 +676,10 @@ class: center, middle, inverse
 
 .smallish[
 
+Daw, N. D., S. J. Gershman, B. Seymour, et al. (2011). "Model-based
+influences on humans' choices and striatal prediction errors". In:
+_Neuron_ 69.6, pp. 1204-1215.
+
 Gläscher, J., N. Daw, P. Dayan, et al. (2010). "States versus rewards:
 dissociable neural prediction error signals underlying model-based and
 model-free reinforcement learning". In: _Neuron_ 66.4, pp. 585-595.
@@ -637,9 +692,10 @@ Montague, P. R., P. Dayan, and T. J. Sejnowski (1996). "A framework for
 mesencephalic dopamine systems based on predictive Hebbian learning".
 In: _Journal of neuroscience_ 16.5, pp. 1936-1947.
 
-Rescorla, R. A. (1972). "A theory of Pavlovian conditioning: Variations
-in the effectiveness of reinforcement and non-reinforcement". In:
-_Classical conditioning, Current research and theory_ 2, pp. 64-69.
+Rescorla, R. A. and A. R. Wagner (1972). "A theory of Pavlovian
+conditioning: Variations in the effectiveness of reinforcement and
+non-reinforcement". In: _Classical conditioning II: Current research
+and theory_, pp. 64-69.
 
 Schulz, E., J. B. Tenenbaum, D. Duvenaud, et al. (2017). "Compositional
 inductive biases in function learning". In: _Cognitive psychology_ 99,
@@ -647,6 +703,10 @@ pp. 44-79.
 
 Skinner, B. (1938). "The behavior of organisms: An experimental
 analysis".
+
+Sutton, R. S. and A. G. Barto (1990). "Time-derivative models of
+Pavlovian reinforcement". In: _Learning and computational neuroscience:
+Foundations of adaptive networks_. Ed. by M. Gabriel and J. Moore.
 
 Sutton, R. S. and A. G. Barto (2018). _Reinforcement learning: An
 introduction_. 2nd edition.
